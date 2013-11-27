@@ -8,6 +8,7 @@ import re
 from datetime import datetime
 from hashlib import sha256
 from io import BytesIO
+from time import sleep
 from types import MethodType
 from xml.dom.minidom import parse as _XML
 from zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED
@@ -200,6 +201,8 @@ def create(repo, target, user):
                     'https://{user}:{passwd}@github.com/{owner}/{repo}'
                     .format(user=user["name"], passwd=user["pass"], **target))
                 call(["git", "push", "--mirror", "--force", url])
+                # give github a moment to sync
+                sleep(5)
 
             # create the release
             download_url = create_release(target, user, tag, tagmsg,
