@@ -16,9 +16,11 @@ import requests
 
 from path import path
 
+
 def XML(source):
     def __enter__(self):
         return self
+
     def __exit__(self, type, value, traceback):
         self.unlink()
 
@@ -26,6 +28,7 @@ def XML(source):
     rv.__enter__ = MethodType(__enter__, rv)
     rv.__exit__ = MethodType(__exit__, rv)
     return rv
+
 
 def call(*args, **kw):
     """ Print and call command """
@@ -40,7 +43,8 @@ def pull(owner, repo, target=None):
     target = target or repo
     try:
         call(["git", "clone",
-              "https://github.com/{owner}/{repo}".format(owner=owner, repo=repo),
+              "https://github.com/{owner}/{repo}".format(owner=owner,
+                                                         repo=repo),
               target])
     except:
         with path(target):
@@ -110,16 +114,16 @@ def make_xpi(updateurl, version, updaterdf):
     rv.seek(0, 0)
     return rv
 
+
 def create_release(target, user, tag, tagmsg, payload):
     """ Create a release """
     s = requests.Session()
     s.verify = True
     s.auth = (user["name"], user["pass"])
     s.headers.update({"User-Agent": "gh-nightly/0.1 like cURL"})
-    url = ("https://api.github.com/repos/{owner}/{repo}/releases"
-            .format(**target))
-    data = dict(tag_name=tag, name=tagmsg,
-                   body="Automated build")
+    url = "https://api.github.com/repos/{owner}/{repo}/releases".format(
+        **target)
+    data = dict(tag_name=tag, name=tagmsg, body="Automated build")
     r = s.post(url, data=json.dumps(data),
                headers={"Content-Type": "application/json"})
     if r.status_code != 201:
@@ -129,24 +133,28 @@ def create_release(target, user, tag, tagmsg, payload):
     try:
         upload = "{name}-{tag}.xpi".format(tag=tag, **target)
         upload_url = "{url}?name={upload}".format(
-               url=release["upload_url"].replace("{?name}", ""),
-               upload=upload)
-        download_url = ("https://github.com/{owner}/{repo}/releases/download/{tag}/{upload}"
-                .format(upload=upload, tag=tag, **target))
+            url=release["upload_url"].replace("{?name}", ""),
+            upload=upload)
+        download_url = (
+            "https://github.com/{owner}/{repo}/releases/download/"
+            "{tag}/{upload}"
+            .format(upload=upload, tag=tag, **target))
         print upload_url, download_url
-        # too bad: urllib3 does not correctly verify wildcard host names in certs
+        # too bad: urllib3 does not correctly verify wildcard host names
         r = s.post(upload_url, data=payload, verify=False,
-                    headers={"Content-Type": "application/x-xpinstall"})
+                   headers={"Content-Type": "application/x-xpinstall"})
         if r.status_code not in (201, 202):
             raise IOError("Failed to create asset: {}".format(r.status_code))
         return download_url
 
     except:
         # roll back release
-        url = ("https://api.github.com/repos/{owner}/{repo}/releases/{id}"
-                .format(id=release["id"], **target))
+        url = (
+            "https://api.github.com/repos/{owner}/{repo}/releases/{id}"
+            .format(id=release["id"], **target))
         s.delete(url)
         raise
+
 
 def create(repo, target, user):
     """ Create a nightly build """
@@ -173,7 +181,7 @@ def create(repo, target, user):
     with XML(updaterdf_file) as updaterdf:
         # create the XPI in memory
         with (repo / (target.get("subdir") or ".")):
-           xpi = make_xpi(target["updateurl"], version, updaterdf)
+            xpi = make_xpi(target["updateurl"], version, updaterdf)
 
         with repo:
             # create tag...
@@ -185,16 +193,19 @@ def create(repo, target, user):
         try:
             with repo:
                 # ... and push
-                url = ('https://{user}:{passwd}@github.com/{owner}/{repo}'
+                url = (
+                    'https://{user}:{passwd}@github.com/{owner}/{repo}'
                     .format(user=user["name"], passwd=user["pass"], **target))
                 call(["git", "push", "--mirror", "--force", url])
 
             # create the release
-            download_url = create_release(target, user, tag, tagmsg, xpi.getvalue())
+            download_url = create_release(target, user, tag, tagmsg,
+                                          xpi.getvalue())
 
             # finish up update.rdf
             hash = updaterdf.createElement("em:updateHash")
-            hash.appendChild(updaterdf.createTextNode("sha256:" + sha256(xpi.getvalue()).hexdigest()))
+            sum = "sha256:{}".format(sha256(xpi.getvalue()).hexdigest())
+            hash.appendChild(updaterdf.createTextNode(sum))
             link = updaterdf.createElement("em:updateLink")
             link.appendChild(updaterdf.createTextNode(download_url))
 
