@@ -155,7 +155,8 @@ def create(repo, target, user):
         with repo:
             call(["git", "describe", "--exact-match", "HEAD"])
         print >>sys.stderr, "Already got a corresponding tag"
-        return
+        if "--force" not in sys.argv:
+            return
     except:
         # No tag yet
         pass
