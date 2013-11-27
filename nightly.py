@@ -44,7 +44,11 @@ def pull(owner, repo, target=None):
               target])
     except:
         with path(target):
+            call(["git", "reset", "--hard"])
             call(["git", "remote", "update"])
+            call(["git", "checkout", "master"])
+            call(["git", "reset", "--hard"])
+            call(["git", "pull"])
 
 
 def update_installrdf(source, updateurl, version, updaterdf):
