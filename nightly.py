@@ -215,7 +215,7 @@ if __name__ == "__main__":
     target = config["target"]
     user = config["user"]
 
-    if True:
+    if False:
         import logging
         import httplib
         httplib.HTTPConnection.debuglevel = 1
