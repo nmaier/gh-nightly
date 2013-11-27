@@ -17,6 +17,9 @@ import requests
 from path import path
 
 
+__version__ = "0.2"
+USER_AGENT = "gh-nightly/{__version__} like cURL"
+
 def XML(source):
     def __enter__(self):
         return self
@@ -120,7 +123,7 @@ def create_release(target, user, tag, tagmsg, payload):
     s = requests.Session()
     s.verify = True
     s.auth = (user["name"], user["pass"])
-    s.headers.update({"User-Agent": "gh-nightly/0.1 like cURL"})
+    s.headers.update({"User-Agent": USER_AGENT})
     url = "https://api.github.com/repos/{owner}/{repo}/releases".format(
         **target)
     data = dict(tag_name=tag, name=tagmsg, body="Automated build")
