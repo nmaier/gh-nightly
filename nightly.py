@@ -68,7 +68,7 @@ def update_installrdf(source, updateurl, version, updaterdf):
         un.data = vn.data
 
         # Set up update.rdf target application
-        un = un.parentNode
+        un = un.parentNode.parentNode
         for n in rdf.getElementsByTagName("em:targetApplication"):
             nn = n.cloneNode(True)
             for nd in nn.getElementsByTagName("Description"):
@@ -193,7 +193,7 @@ def create(repo, target, user):
 
             # finish up update.rdf
             hash = updaterdf.createElement("em:updateHash")
-            hash.appendChild(updaterdf.createTextNode(sha256(xpi.getvalue()).hexdigest()))
+            hash.appendChild(updaterdf.createTextNode("sha256:" + sha256(xpi.getvalue()).hexdigest()))
             link = updaterdf.createElement("em:updateLink")
             link.appendChild(updaterdf.createTextNode(download_url))
 
