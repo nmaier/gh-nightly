@@ -176,7 +176,7 @@ def create(repo, target, user):
         rev = call(["git", "rev-parse", "HEAD"])
     now = datetime.now()
     tag = now.strftime("nightly-%Y-%m-%d-%H%M")
-    tagmsg = now.strftime("Scriptish nightly - %Y-%m-%d %H:%M")
+    tagmsg = now.strftime("{fullname} nightly - %Y-%m-%d %H:%M".format(**target))
     version = now.strftime(".%Y%m%d.%H%M.{rev}".format(rev=rev[:8]))
     print tag, tagmsg, version
 

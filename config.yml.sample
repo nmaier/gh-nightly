@@ -5,6 +5,7 @@ target:
   owner: scriptish
   repo: scriptish-nightlies
   name: scriptish
+  fullname: Scriptish
   subdir: extension
   updateurl: https://code.downthemall.net/scriptish-nightly-update.rdf
   updaterdf: ~/html/scriptish-nightly-update.rdf
